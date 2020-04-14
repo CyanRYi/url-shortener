@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>URL Shortener</title>
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  class ShortenUrlForm extends React.Component {
+    state = {
+      shortenUrl: '',
+      originalUrl: '',
+      error: ''
+    }
+
+    handleChange = (e) => {
+      this.setState({originalUrl: e.target.value});
+    }
+
+    handleSubmit = () => {
+      if (!this.state.originalUrl) {
+        this.setState({error: 'Input Original URL'})
+        return;
+      }
+
+      this.setState({shortenUrl: '', error: ''});
+      axios({
+        method: 'post',
+        url: '/shorten-url',
+        data: {originalUrl: this.state.originalUrl}
+      })
+      .then(response =>
+          this.setState({
+            shortenUrl: response.data.shortenUrl
+          })
+      )
+      .catch(error =>
+          this.setState({error: error.response.data.message})
+      );
+    }
+
+    render() {
+      return (
+          <div>
+            <span>Input Original Url : </span><input onChange={this.handleChange}/>
+            <button onClick={this.handleSubmit}>
+              Submit
+            </button>
+            <br/>
+            {this.state.error ? <span style={{color: 'red'}}>Error : {this.state.error}</span> : null}
+            {this.state.shortenUrl ? <a href={this.state.shortenUrl}>{this.state.shortenUrl}</a> : null}
+          </div>
+      )
+    }
+  }
+
+  ReactDOM.render(<ShortenUrlForm/>, document.getElementById("root"))
+</script>
+</body>
+</html>
